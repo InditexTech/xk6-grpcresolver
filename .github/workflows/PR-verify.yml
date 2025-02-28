@@ -1,0 +1,70 @@
+---
+name: PR-verify
+
+on:
+  pull_request:
+
+env:
+  GO_VERSION: 1.23.5
+  NODE_VERSION: 18.x
+
+jobs:
+  verify:
+    name: Verify
+    runs-on: ubuntu-latest
+    steps:
+      - uses: KengoTODA/actions-setup-docker-compose@v1
+        with:
+          version: '2.14.2' # the full version of `docker-compose` command    
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Setup Go version
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}          
+
+      - name: Verify
+        run: |
+          make verify
+
+  repo-linter:
+    name: Repo Linter
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Setup Node version
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Execute repolinter
+        run: |
+          echo "Installing repolinter"
+          npm install -g repolinter@v0.11.2
+
+          echo "Executing repolinter"
+          repolinter --rulesetFile repolinter.json --dryRun .
+
+          echo "Repolinter execution completed"
+
+  reuse-compliance:
+    name: REUSE Compliance
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: REUSE Compliance Check
+        uses: fsfe/reuse-action@v3

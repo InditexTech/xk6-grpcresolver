@@ -104,7 +104,7 @@ func (r *Resolver) containsNewIp() bool {
 
 // startPeriodicUpdater starts a task that periodically synchronizes the IPs of the Resolver with those in the resolverIps array.
 func (r *Resolver) startPeriodicUpdater() {
-	ticker := time.NewTicker(10 * time.Second)
+	ticker := time.NewTicker(settings.SyncEvery)
 	for {
 		select {
 		case <-ticker.C:
@@ -129,9 +129,7 @@ func startPeriodicResolver(serviceHost string) {
 	}
 
 	go func() {
-		// TODO configurable period time
-		// TODO Check if the ticker runs for the first time then waits, or viceversa
-		for range time.NewTicker(10 * time.Second).C {
+		for range time.NewTicker(settings.UpdateEvery).C {
 			periodicResolverTask(serviceHost)
 		}
 	}()

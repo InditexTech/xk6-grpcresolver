@@ -28,8 +28,9 @@ The plugin is always enabled when running a k6 binary compiled with this plugin,
 
 There are some attributes that can be configured with the following environment variables:
 
-| Key                      | Description                                                                                                                                                     | Default  |
-|--------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------|----------|
-| `GRPC_RESOLVER_PROTOCOL` | Set the protocol name that will trigger the plugin to work for a connection, if its URL has this protocol name.                                                 | `k8s`    |
-| `GRCP_UPDATE_EVERY`      | Periodicity at which query the URL hostname for the list of IPs. Value must comply with [Go time.ParseDuration](https://pkg.go.dev/time#ParseDuration) format.. | `3s`     |
-| `GRPC_DEBUG_LOGS`        | If `true`, show debug logs.                                                                                                                                     | Disabled |
+| Key                      | Description                                                                                                                                                                   | Default  |
+|--------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------|
+| `GRPC_RESOLVER_PROTOCOL` | Set the protocol name that will trigger the plugin to work for a connection, if its URL has this protocol name.                                                               | `k8s`    |
+| `GRCP_UPDATE_EVERY`      | Periodicity at which query the URL hostname for the list of IPs. Value must comply with [Go time.ParseDuration](https://pkg.go.dev/time#ParseDuration) format.                | `3s`     |
+| `GRPC_SYNC_EVERY`        | Periodicity at which synchronize the resolved IPs with the gRPC clients per VU. Value must comply with [Go time.ParseDuration](https://pkg.go.dev/time#ParseDuration) format. | `3s`     |
+| `GRPC_DEBUG_LOGS`        | If `true`, show debug logs.                                                                                                                                                   | Disabled |

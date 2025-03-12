@@ -7,5 +7,5 @@ import (
 
 // Register k8s with gRPC.
 func init() {
-	resolver.Register(&grpcresolver.K8sBuilder{})
+	resolver.Register(&grpcresolver.Builder{})
 }

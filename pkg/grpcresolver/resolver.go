@@ -2,114 +2,23 @@ package grpcresolver
 
 import (
 	"fmt"
-	"net"
-	"os"
-	"strconv"
-	"strings"
-	"time"
-
-	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc/resolver"
+	"net"
+	"sync"
+	"time"
 )
 
-const (
-	name                      = "k8s"
-	grpcDebugLogsEnvVarName   = "GRPC_DEBUG_LOGS"
-	grpcUpdateEveryEnvVarName = "GRCP_UPDATE_EVERY"
-	trueValue                 = "true"
+var (
+	// resolverIps contains an updated list of the IPs resolved for the serviceHost.
+	resolverIps []net.IP
+
+	periodicResolverStarted     bool
+	periodicResolverStartedLock sync.Mutex
 )
 
-var updateEvery = 3 * time.Second
-var showDebugLogs = false
-var logger = logrus.New()
-var isResolverStarted = false
-var resolverIps []net.IP
-
-// Register k8s with gRPC.
-func init() {
-	resolver.Register(&K8sBuilder{})
-}
-
-type K8sBuilder struct{}
-
-// Build parses the target for the service host and the endpoint port, returning an error if these can not be parsed.
-// Should this succeed, it initialises a khsResolver, calls the first resolve and if this completes, it's returned.
-func (kb *K8sBuilder) Build(target resolver.Target, cc resolver.ClientConn, _ resolver.BuildOptions) (resolver.Resolver, error) {
-	showDebugLogs = os.Getenv(grpcDebugLogsEnvVarName) == trueValue
-	if os.Getenv(grpcUpdateEveryEnvVarName) != "" {
-		updateEvery, _ = time.ParseDuration(os.Getenv(grpcUpdateEveryEnvVarName))
-	}
-
-	logger.Info("Building GRPC resolver for target: ", target)
-	strs := strings.Split(target.Endpoint(), ":")
-
-	if len(strs) > 2 || len(strs) <= 0 {
-		return nil, fmt.Errorf("couldn't parse given target endpoint: %s", target.Endpoint())
-	}
-
-	updater := &k8sClientUpdater{
-		cc:          cc,
-		serviceHost: strs[0],
-		quitC:       make(chan struct{}),
-	}
-
-	if len(strs) == 2 {
-		port, err := strconv.Atoi(strs[1])
-
-		if err != nil {
-			return nil, fmt.Errorf("couldn't parse given port: %s", strs[1])
-		}
-
-		updater.endpointPort = port
-	}
-
-	err := updater.update()
-
-	if err != nil {
-		return nil, err
-	}
-
-	if !isResolverStarted {
-		kr := &k8sResolver{}
-		isResolverStarted = true
-		kr.resolveServiceIps(strs[0])
-		go kr.periodicResolveServiceIps(strs[0])
-	}
-
-	go updater.periodicUpdateClient()
-
-	return updater, nil
-}
-
-// Scheme returns `hpa`.
-func (kb *K8sBuilder) Scheme() string {
-	return name
-}
-
-type k8sResolver struct {
-}
-
-func (k *k8sResolver) periodicResolveServiceIps(serviceHost string) {
-	t := time.NewTicker(10 * time.Second)
-	for range t.C {
-		if err := k.resolveServiceIps(serviceHost); err != nil {
-			logger.Error("Error looking up IPs for ", serviceHost, " : ", err)
-		}
-	}
-}
-
-func (k *k8sResolver) resolveServiceIps(serviceHost string) error {
-	var err error
-	resolverIps, err = net.LookupIP(serviceHost)
-	logIfDebug("Looking up IPs for ", serviceHost, " : ", resolverIps)
-
-	return err
-}
-
-// k8sClientUpdater is the resolver for Kubernetes Headless Services. When called, it looks up all the A Records for the given
-// Host, passing them to a ClientConn as Backends.
-type k8sClientUpdater struct {
-	cc resolver.ClientConn
+// Resolver implements the gRPC client resolver.go Resolved interface, so can replace the default implementation in the k6 gRPC client.
+type Resolver struct {
+	conn resolver.ClientConn
 
 	serviceHost  string
 	endpointPort int
@@ -118,11 +27,21 @@ type k8sClientUpdater struct {
 	quitC chan struct{}
 }
 
-// update calls the ClientConn NewAddress callback with all the IPs returned from a standard DNS lookup to the serviceHost,
-// affixing kr.endpointPort to each of them.
-func (kr *k8sClientUpdater) update() error {
-	newIps := kr.containsNewIp()
-	deletedIps := len(kr.currentIps) > len(resolverIps)
+// ResolveNow runs an internal resolve, updating with the current list of endpoints.
+func (r *Resolver) ResolveNow(_ resolver.ResolveNowOptions) {
+	if err := r.update(); err != nil {
+		logger.Error("error resolving: ", err)
+	}
+}
+
+func (r *Resolver) Close() {
+	r.quitC <- struct{}{}
+}
+
+// update updates the Resolver addressed with the current resolverIps list.
+func (r *Resolver) update() error {
+	newIps := r.containsNewIp()
+	deletedIps := len(r.currentIps) > len(resolverIps)
 	same := !newIps && !deletedIps
 
 	if same {
@@ -135,13 +54,13 @@ func (kr *k8sClientUpdater) update() error {
 	for i, ip := range resolverIps {
 		addr := ip.String()
 
-		if kr.endpointPort != 0 {
-			addr = fmt.Sprintf("%s:%d", addr, kr.endpointPort)
+		if r.endpointPort != 0 {
+			addr = fmt.Sprintf("%s:%d", addr, r.endpointPort)
 		}
 
 		addrs[i] = resolver.Address{
 			Addr:       addr,
-			ServerName: kr.serviceHost,
+			ServerName: r.serviceHost,
 		}
 	}
 
@@ -152,23 +71,23 @@ func (kr *k8sClientUpdater) update() error {
 	//
 	// grpc/service_config.go currently supports a 'loadBalancingConfig' field, however it looks likely to change, so for
 	// now stick to the existing JSON definition.
-	if len(kr.currentIps) > 0 {
-		logger.Info("Service host k8s:///", kr.serviceHost, " has been resolved successfully with IPs ", addrs)
+	if len(r.currentIps) > 0 {
+		logger.Info("Service host k8s:///", r.serviceHost, " has been resolved successfully with IPs ", addrs)
 	}
-	kr.currentIps = resolverIps
-	kr.cc.UpdateState(resolver.State{
+	r.currentIps = resolverIps
+	_ = r.conn.UpdateState(resolver.State{
 		Addresses:     addrs,
-		ServiceConfig: kr.cc.ParseServiceConfig(`{"loadBalancingPolicy": "round_robin"}`),
+		ServiceConfig: r.conn.ParseServiceConfig(`{"loadBalancingPolicy": "round_robin"}`),
 	})
 
 	return nil
 }
 
-func (kr *k8sClientUpdater) containsNewIp() bool {
+func (r *Resolver) containsNewIp() bool {
 	newIps := false
 	for _, ip := range resolverIps {
 		exists := false
-		for _, currentIp := range kr.currentIps {
+		for _, currentIp := range r.currentIps {
 			if ip.Equal(currentIp) {
 				exists = true
 				break
@@ -183,37 +102,48 @@ func (kr *k8sClientUpdater) containsNewIp() bool {
 	return newIps
 }
 
-// periodicUpdateClient periodically calls resolve to ensure kr.cc contains an recent list of the service endpoints.
-func (kr *k8sClientUpdater) periodicUpdateClient() {
-	t := time.NewTicker(updateEvery)
+// startPeriodicUpdater starts a task that periodically synchronizes the IPs of the Resolver with those in the resolverIps array.
+func (r *Resolver) startPeriodicUpdater() {
+	ticker := time.NewTicker(10 * time.Second)
 	for {
 		select {
-		case <-t.C:
-			err := kr.update()
-
-			if err != nil {
-				logger.Error("[hpa - resolver.go] error resolving: ", err)
+		case <-ticker.C:
+			if err := r.update(); err != nil {
+				logger.Error("periodic updater failed resolving: ", err)
 			}
-		case <-kr.quitC:
+		case <-r.quitC:
 			return
 		}
 	}
 }
 
-func (kr *k8sClientUpdater) ResolveNow(option resolver.ResolveNowOptions) {
-	err := kr.update()
+// startPeriodicResolver starts a task that periodically analyzes the IPs of the serviceHost.
+// The task is initialized only once for all VUs.
+// The IPs are stored in resolverIps singleton.
+func startPeriodicResolver(serviceHost string) {
+	periodicResolverStartedLock.Lock()
+	defer periodicResolverStartedLock.Unlock()
 
-	if err != nil {
-		logger.Error("[hpa - resolver.go] error resolving: ", err)
+	if periodicResolverStarted {
+		return
 	}
+
+	go func() {
+		// TODO configurable period time
+		// TODO Check if the ticker runs for the first time then waits, or viceversa
+		for range time.NewTicker(10 * time.Second).C {
+			periodicResolverTask(serviceHost)
+		}
+	}()
+	periodicResolverStarted = true
 }
 
-func (kr *k8sClientUpdater) Close() {
-	kr.quitC <- struct{}{}
-}
-
-func logIfDebug(args ...interface{}) {
-	if showDebugLogs {
-		logger.Info(args...)
+func periodicResolverTask(serviceHost string) {
+	var err error
+	resolverIps, err = net.LookupIP(serviceHost)
+	if err != nil {
+		logger.Error("Error looking up IPs for ", serviceHost, " : ", err)
+	} else {
+		logIfDebug("Looking up IPs for ", serviceHost, " : ", resolverIps)
 	}
 }

@@ -15,7 +15,7 @@ client.load(['.'], 'helloworld.proto');
 
 export default () => {
     if (__ITER == 0) {
-        client.connect(`k8s://${__ENV.GRPC_SERVER}:50051`, {
+        client.connect(`k8s:///${__ENV.GRPC_SERVER}:50051`, {
             plaintext: true
         });
     }
@@ -29,7 +29,7 @@ export default () => {
         });
     });
 
-    // sleep(0.3);
+     sleep(1);
 };
 
 export function teardown(data) {

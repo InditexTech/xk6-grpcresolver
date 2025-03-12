@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-var settings SettingsSpec
+var settings = &SettingsSpec{}
 
 type SettingsSpec struct {
 	ProtocolName  string        `env:"GRPC_RESOLVER_PROTOCOL" envDefault:"k8s"`
@@ -14,6 +14,6 @@ type SettingsSpec struct {
 	ShowDebugLogs bool          `env:"GRPC_DEBUG_LOGS" envDefault:"false"`
 }
 
-func loadSettings() error {
-	return env.Parse(&settings)
+func LoadSettings() error {
+	return env.Parse(settings)
 }

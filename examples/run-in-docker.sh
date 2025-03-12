@@ -24,12 +24,25 @@ sleep 2  # TODO Better Wait for containers deleted
 for ((i=1;i<=GRPC_SERVERS_REPLICAS;i++))
 do
   container_name="${DOCKER_NAME}_$i"
-  docker run -d --rm --name="$container_name" --label="$DOCKER_LABEL" -v "$(pwd):/mnt:ro" --entrypoint=/bin/bash "$DOCKER_IMAGE" /mnt/examples/run-grpc-server.sh || exit 1
+  docker run -d --rm --name="$container_name" \
+    --label="$DOCKER_LABEL" \
+    -v "$(pwd):/mnt:ro" \
+    --entrypoint=/bin/bash \
+    "$DOCKER_IMAGE" \
+    /mnt/examples/run-grpc-server.sh \
+    || exit 1
   docker network connect --alias="$DOCKER_NAME" "$DOCKER_NETWORK_NAME" "$container_name" || exit 1
 done
 
-# TODO Wait for all containers to be ready
 read -rp "Wait for GRPC servers to be ready, then Press enter to continue"
 
 # Run k6 client in foreground
-docker run -it --rm --name="${DOCKER_NAME}_k6" -e "GRPC_SERVER=$DOCKER_NAME" --label="$DOCKER_LABEL" -v "$(pwd):/mnt" --workdir=/mnt --network="$DOCKER_NETWORK_NAME" "$DOCKER_IMAGE" ./k6 run ./examples/example.js --duration="$K6_DURATION" --vus=$K6_VUS || exit 1
+# Example: docker run -it --rm --name=xk6-grpcresolver-example_k6 -e GRPC_SERVER=xk6-grpcresolver-example -e GRPC_DEBUG_LOGS=true --label=xk6-grpcresolver-example=1 -v /home/user/xk6-grpcresolver:/mnt --workdir=/mnt --network=xk6-grpcresolver-example golang:latest ./k6 run ./examples/example.js --duration=5m --vus=100
+docker run -it --rm --name="${DOCKER_NAME}_k6" \
+  -e "GRPC_SERVER=$DOCKER_NAME" -e "GRPC_DEBUG_LOGS=true" \
+  --label="$DOCKER_LABEL" \
+  -v "$(pwd):/mnt" --workdir=/mnt \
+  --network="$DOCKER_NETWORK_NAME" \
+  "$DOCKER_IMAGE" \
+  ./k6 run ./examples/example.js --duration="$K6_DURATION" --vus=$K6_VUS \
+  || exit 1

@@ -24,7 +24,7 @@ make build
 
 ## Usage
 
-The plugin is always enabled when running a k6 binary compiled with this plugin, and specifying the URL of the gRPC service prefixed by the protocol `k8s://`. See the [examples](examples) for more details.
+The plugin is always enabled when running a k6 binary compiled with this plugin, and specifying the URL of the gRPC service prefixed by `k8s:///` (this can be changed with the `GRPC_RESOLVER_PROTOCOL` environment variable). See the [examples](examples) for more details.
 
 There are some attributes that can be configured with the following environment variables:
 

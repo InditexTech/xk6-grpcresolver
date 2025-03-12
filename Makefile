@@ -1,41 +1,57 @@
-MAKEFLAGS += --silent
+XK6_VERSION := v0.13.4
+XK6_BINARY := $(shell command -v xk6 2> /dev/null)
 
-all: clean format test build
+GOLANGCI_VERSION := v1.64.5
+GOLANGCI_BINARY := $(shell command -v golangci-lint 2> /dev/null)
 
-## help: Prints a list of available build targets.
-help:
-	echo "Usage: make <OPTIONS> ... <TARGETS>"
-	echo ""
-	echo "Available targets are:"
-	echo ''
-	sed -n 's/^##//p' ${PWD}/Makefile | column -t -s ':' | sed -e 's/^/ /'
-	echo
-	echo "Targets run by default are: `sed -n 's/^all: //p' ./Makefile | sed -e 's/ /, /g' | sed -e 's/\(.*\), /\1, and /'`"
+.PHONY: all
+all: format lint test run
 
-## clean: Removes any previously created build artifacts.
-clean:
-	rm -f ./k6
+.PHONY: deps
+deps:
+	@if [ -z "$(XK6_BINARY)" ]; then \
+		echo "Installing xk6..."; \
+		go install go.k6.io/xk6/cmd/xk6@$(XK6_VERSION); \
+	else \
+		echo "xk6 is already installed."; \
+	fi
 
-## build: Builds a custom 'k6' with the local extension. 
-build:
-	go install go.k6.io/xk6/cmd/xk6@latest
-	xk6 build --with $(shell go list -m)=.
+	@if [ -z "$(GOLANGCI_BINARY)" ]; then \
+			echo "Installing golangci-lint..."; \
+			go install github.com/golangci/golangci-lint/cmd/golangci-lint@$(GOLANGCI_VERSION); \
+	else \
+		echo "golangci-lint is already installed."; \
+	fi
 
-run:
-	GRPC_DEBUG_LOGS=true xk6 run ./examples/example.js
+.PHONY: build
+build: deps
+	@echo "Building k6 with grpcresolver extension..."
+	@xk6 build --with github.com/InditexTech/xk6-grpcresolver=.
 
-server:
-	$(PWD)/examples/run-grpc-server.sh
+.PHONY: run
+run: deps
+	@echo "Running example..."
+	@xk6 run ./examples/main.js
 
-verify:
-	go test -cover -race ./...
+.PHONY: verify
+verify: format lint test run
+	@echo "Running verify..."
 
-## format: Applies Go formatting to code.
+.PHONY: test
+test:
+	@echo "No tests available"
+
+.PHONY: tidy
+tidy:
+	@echo "Running go mod tidy..."
+	@go mod tidy
+
+.PHONY: format
 format:
+	@echo "Running go fmt..."
 	go fmt ./...
 
-## test: Executes any unit tests.
-test:
-	go test -cover -race ./...
-
-.PHONY: build clean format help test
+.PHONY: lint
+lint: deps
+	@echo "Running golangci-lint..."
+	@golangci-lint run

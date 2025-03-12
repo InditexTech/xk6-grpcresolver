@@ -1,4 +1,4 @@
-package resolver
+package grpcresolver
 
 import (
 	"fmt"
@@ -27,14 +27,14 @@ var resolverIps []net.IP
 
 // Register k8s with gRPC.
 func init() {
-	resolver.Register(&k8sBuilder{})
+	resolver.Register(&K8sBuilder{})
 }
 
-type k8sBuilder struct{}
+type K8sBuilder struct{}
 
 // Build parses the target for the service host and the endpoint port, returning an error if these can not be parsed.
 // Should this succeed, it initialises a khsResolver, calls the first resolve and if this completes, it's returned.
-func (kb *k8sBuilder) Build(target resolver.Target, cc resolver.ClientConn, opts resolver.BuildOptions) (resolver.Resolver, error) {
+func (kb *K8sBuilder) Build(target resolver.Target, cc resolver.ClientConn, _ resolver.BuildOptions) (resolver.Resolver, error) {
 	showDebugLogs = os.Getenv(grpcDebugLogsEnvVarName) == trueValue
 	if os.Getenv(grpcUpdateEveryEnvVarName) != "" {
 		updateEvery, _ = time.ParseDuration(os.Getenv(grpcUpdateEveryEnvVarName))
@@ -82,7 +82,7 @@ func (kb *k8sBuilder) Build(target resolver.Target, cc resolver.ClientConn, opts
 }
 
 // Scheme returns `hpa`.
-func (kb *k8sBuilder) Scheme() string {
+func (kb *K8sBuilder) Scheme() string {
 	return name
 }
 

@@ -10,17 +10,12 @@ export let options = {
     ]
 };
 
-
 const client = new grpc.Client();
 client.load(['.'], 'helloworld.proto');
 
-export function setup() {
-
-}
-
 export default () => {
     if (__ITER == 0) {
-        client.connect('k8s:///grpc-server:50051', {
+        client.connect(`k8s://${__ENV.GRPC_SERVER}:50051`, {
             plaintext: true
         });
     }
@@ -34,16 +29,7 @@ export default () => {
         });
     });
 
-    /*group('demoGrpcGroup2', function () {
-        const data = { name: 'Gossip' };
-        const response = client.invoke('helloworld.Greeter/SayHello', data);
-
-        check(response, {
-            'status is OK': (r) => r && r.status === grpc.StatusOK,
-        });
-    });*/
-
-    sleep(0.3);
+    // sleep(0.3);
 };
 
 export function teardown(data) {

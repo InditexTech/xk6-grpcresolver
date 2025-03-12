@@ -1,4 +1,4 @@
-module github.com/InditexTech/lib-ksixgrpcresolver
+module github.com/InditexTech/xk6-grpcresolver
 
 go 1.23.3
 

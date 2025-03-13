@@ -1,21 +1,28 @@
 package grpcresolver
 
 import (
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
+	"github.com/stretchr/testify/suite"
 	"google.golang.org/grpc/resolver"
+	"net"
 	neturl "net/url"
 	"testing"
 	"time"
 )
 
-// TestClientConnImpl struct that implements resolver.ClientConn
-// Copied from google.golang.org/grpc@v1.60.0/internal/testutils/resolver.go
-type TestClientConnImpl struct {
-	resolver.ClientConn
+type BuilderTestSuite struct {
+	suite.Suite
 }
 
-func TestCompleteBuilder(t *testing.T) {
+func TestBuilderTestSuite(t *testing.T) {
+	suite.Run(t, new(BuilderTestSuite))
+}
+
+func (suite *BuilderTestSuite) AfterTest(_, _ string) {
+	hostsIPs = make(map[string][]net.IP)
+}
+
+func (suite *BuilderTestSuite) TestBuilderComplete() {
+	host := "google.com"
 	endpoint := "k8s:///google.com:50051"
 	url, err := neturl.Parse(endpoint)
 	if err != nil {
@@ -31,34 +38,44 @@ func TestCompleteBuilder(t *testing.T) {
 
 	builder := &Builder{}
 	target := resolver.Target{URL: *url}
-	conn := TestClientConnImpl{}
+	conn := TestClientConnImpl{
+		stateUpdates: &Array[resolver.State]{},
+	}
 
 	resultResolver, err := builder.Build(target, conn, resolver.BuildOptions{})
-	require.Nil(t, err)
-	assert.Equal(t, conn, resultResolver.(*Resolver).conn)
+	suite.Require().Nil(err)
+	suite.Assert().Equal(conn, resultResolver.(*Resolver).conn)
 
-	// TODO Try to continue the test
+	// Wait for resolver/updater to run
+	time.Sleep(settings.UpdateEvery * 3)
 
-	//// Wait for resolver/updater to run
-	//time.Sleep(settings.UpdateEvery * 3)
-	//
-	//ips, ok := getResolverIPs("google.com")
-	//assert.True(t, ok)
-	//assert.NotEmpty(t, ips)
+	// Should have resolved the IPs in the singleton
+	ips, ok := getResolverIPs(host)
+	suite.Assert().True(ok)
+	suite.Assert().NotEmpty(ips)
+
+	// Should have updated the ClientConn with the resolved IPs
+	connUpdates := conn.stateUpdates.values
+	suite.Assert().GreaterOrEqual(1, len(connUpdates))
+	for _, connUpdate := range connUpdates {
+		for _, address := range connUpdate.Addresses {
+			suite.Assert().Equal(host, address.ServerName)
+		}
+	}
 }
 
-func TestBuilderEmptyEndpoint(t *testing.T) {
+func (suite *BuilderTestSuite) TestBuilderEmptyEndpoint() {
 	builder := &Builder{}
 	target := resolver.Target{}
 	conn := TestClientConnImpl{}
 
 	resultResolver, err := builder.Build(target, conn, resolver.BuildOptions{})
-	assert.Nil(t, resultResolver)
-	assert.Error(t, err)
-	assert.ErrorContains(t, err, "invalid target")
+	suite.Assert().Nil(resultResolver)
+	suite.Assert().Error(err)
+	suite.Assert().ErrorContains(err, "invalid target")
 }
 
-func TestBuilderInvalidEndpoint(t *testing.T) {
+func (suite *BuilderTestSuite) TestBuilderInvalidEndpoint() {
 	endpoint := "k8s:///google.com:aaa:50051"
 	url, err := neturl.Parse(endpoint)
 	if err != nil {
@@ -74,12 +91,12 @@ func TestBuilderInvalidEndpoint(t *testing.T) {
 	conn := TestClientConnImpl{}
 
 	resultResolver, err := builder.Build(target, conn, resolver.BuildOptions{})
-	assert.Nil(t, resultResolver)
-	assert.Error(t, err)
-	assert.ErrorContains(t, err, "invalid target endpoint \"google.com:aaa:50051\"")
+	suite.Assert().Nil(resultResolver)
+	suite.Assert().Error(err)
+	suite.Assert().ErrorContains(err, "invalid target endpoint \"google.com:aaa:50051\"")
 }
 
-func TestBuilderInvalidPort(t *testing.T) {
+func (suite *BuilderTestSuite) TestBuilderInvalidPort() {
 	endpoint := "k8s:///google.com:aaa"
 	url, err := neturl.Parse(endpoint)
 	if err != nil {
@@ -95,7 +112,7 @@ func TestBuilderInvalidPort(t *testing.T) {
 	conn := TestClientConnImpl{}
 
 	resultResolver, err := builder.Build(target, conn, resolver.BuildOptions{})
-	assert.Nil(t, resultResolver)
-	assert.Error(t, err)
-	assert.ErrorContains(t, err, "invalid port: aaa")
+	suite.Assert().Nil(resultResolver)
+	suite.Assert().Error(err)
+	suite.Assert().ErrorContains(err, "invalid port: aaa")
 }

@@ -15,7 +15,7 @@ var (
 	periodicResolverStartLock sync.Mutex
 )
 
-// Resolver implements the gRPC client resolver.go Resolved interface, so can replace the default implementation in the k6 gRPC client.
+// Resolver implements the gRPC client resolver.go Resolver interface, so can replace the default implementation in the k6 gRPC client.
 type Resolver struct {
 	conn resolver.ClientConn
 

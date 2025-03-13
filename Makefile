@@ -5,7 +5,7 @@ GOLANGCI_VERSION := v1.64.5
 GOLANGCI_BINARY := $(shell command -v golangci-lint 2> /dev/null)
 
 .PHONY: all
-all: format lint test run
+all: format lint test
 
 .PHONY: deps
 deps:
@@ -34,7 +34,7 @@ run: deps
 	@xk6 run ./examples/main.js
 
 .PHONY: verify
-verify: format lint test run
+verify: format lint test
 	@echo "Running verify..."
 
 .PHONY: test

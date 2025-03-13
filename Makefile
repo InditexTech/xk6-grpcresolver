@@ -39,7 +39,8 @@ verify: format lint test run
 
 .PHONY: test
 test:
-	@echo "No tests available"
+	@echo "Running unit tests..."
+	@go clean -testcache && go test ./...
 
 .PHONY: tidy
 tidy:

@@ -1,6 +1,7 @@
 package grpcresolver
 
 import (
+	"fmt"
 	"github.com/stretchr/testify/suite"
 	"google.golang.org/grpc/resolver"
 	"net"
@@ -59,7 +60,7 @@ func (suite *BuilderTestSuite) TestBuilderComplete() {
 	suite.Assert().GreaterOrEqual(1, len(connUpdates))
 	for _, connUpdate := range connUpdates {
 		for _, address := range connUpdate.Addresses {
-			suite.Assert().Equal(host, address.ServerName)
+			suite.Assert().Equal(host, address.ServerName, fmt.Sprintf("asserting address.Servername %v", address))
 		}
 	}
 }

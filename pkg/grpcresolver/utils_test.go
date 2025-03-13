@@ -15,21 +15,12 @@ func (a *Array[T]) Append(value T) {
 
 // TestClientConnImpl struct that implements resolver.ClientConn
 // Copied from google.golang.org/grpc@v1.60.0/internal/testutils/resolver.go
+// The methods cannot be implemented with pointer receivers.
 type TestClientConnImpl struct {
-	//stateUpdates atomic.Pointer[[]resolver.State]
 	stateUpdates *Array[resolver.State]
 }
 
 func (t TestClientConnImpl) UpdateState(state resolver.State) error {
-	//var stateUpdates []resolver.State
-	//if stateUpdatesPtr := t.stateUpdates.Load(); stateUpdatesPtr != nil {
-	//	stateUpdates = *stateUpdatesPtr
-	//}
-	//
-	//stateUpdates = append(stateUpdates, state)
-	//t.stateUpdates.Store(&stateUpdates)
-	//return nil
-
 	t.stateUpdates.Append(state)
 	return nil
 }

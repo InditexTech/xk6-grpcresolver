@@ -12,7 +12,7 @@ var (
 )
 
 func TestLoadSettingsDefaults(t *testing.T) {
-	err := loadSettings()
+	err := LoadSettings()
 	assert.Nil(t, err)
 	assert.Equal(t, "k8s", settings.ProtocolName)
 	assert.Equal(t, 3*time.Second, settings.UpdateEvery)
@@ -34,7 +34,7 @@ func TestLoadSettingsFromEnv(t *testing.T) {
 
 	setEnvVar("GRPC_DEBUG_LOGS", "true")
 
-	err := loadSettings()
+	err := LoadSettings()
 	assert.Nil(t, err)
 	assert.Equal(t, resolverProtocol, settings.ProtocolName)
 	assert.Equal(t, updateEvery, settings.UpdateEvery)

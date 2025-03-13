@@ -14,12 +14,12 @@ type Builder struct{}
 func (b *Builder) Build(target resolver.Target, conn resolver.ClientConn, _ resolver.BuildOptions) (resolver.Resolver, error) {
 	endpoint := target.Endpoint()
 	if endpoint == "" {
-		return nil, fmt.Errorf("could not parse given target \"%s\"", target.String())
+		return nil, fmt.Errorf("invalid target \"%s\"", target.String())
 	}
 
 	endpointChunks := strings.Split(endpoint, ":")
 	if len(endpointChunks) > 2 || len(endpointChunks) <= 0 {
-		return nil, fmt.Errorf("couldn't parse given target endpoint \"%s\"", endpoint)
+		return nil, fmt.Errorf("invalid target endpoint \"%s\"", endpoint)
 	}
 
 	endpointHost := endpointChunks[0]
@@ -33,7 +33,7 @@ func (b *Builder) Build(target resolver.Target, conn resolver.ClientConn, _ reso
 		portStr := endpointChunks[1]
 		port, err := strconv.Atoi(portStr)
 		if err != nil {
-			return nil, fmt.Errorf("couldn't parse given port: %s", portStr)
+			return nil, fmt.Errorf("invalid port: %s", portStr)
 		}
 
 		customResolver.endpointPort = port

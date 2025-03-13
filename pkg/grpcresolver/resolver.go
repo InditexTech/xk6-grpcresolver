@@ -10,11 +10,9 @@ import (
 
 var (
 	// resolverIps contains an updated list of the IPs resolved for the serviceHost.
-	resolverIps []net.IP
-	// TODO resolverIps should be a map of serviceHost to IPs
-
-	periodicResolverStarted     bool
-	periodicResolverStartedLock sync.Mutex
+	hostsIPs                  = make(map[string][]net.IP)
+	hostsIPsLock              sync.Mutex
+	periodicResolverStartLock sync.Mutex
 )
 
 // Resolver implements the gRPC client resolver.go Resolved interface, so can replace the default implementation in the k6 gRPC client.
@@ -39,14 +37,15 @@ func (r *Resolver) Close() {
 	r.quitC <- struct{}{}
 }
 
-// update updates the Resolver addressed with the current resolverIps list.
+// update updates the Resolver addresses with the current resolverIps list.
 func (r *Resolver) update() error {
 	newIps := r.containsNewIp()
+	resolverIps, _ := getResolverIPs(r.serviceHost)
 	deletedIps := len(r.currentIps) > len(resolverIps)
 	same := !newIps && !deletedIps
 
 	if same {
-		logIfDebug("No changes in resolved IPs. Current IPs: ", r.currentIps)
+		logIfDebug(fmt.Sprintf("No changes in resolved IPs for %s. Current IPs: %v", r.serviceHost, r.currentIps))
 		return nil
 	}
 
@@ -86,6 +85,7 @@ func (r *Resolver) update() error {
 
 func (r *Resolver) containsNewIp() bool {
 	newIps := false
+	resolverIps, _ := getResolverIPs(r.serviceHost)
 	for _, ip := range resolverIps {
 		exists := false
 		for _, currentIp := range r.currentIps {
@@ -105,6 +105,7 @@ func (r *Resolver) containsNewIp() bool {
 
 // startPeriodicUpdater starts a task that periodically synchronizes the IPs of the Resolver with those in the resolverIps array.
 func (r *Resolver) startPeriodicUpdater() {
+	logIfDebug("Starting periodic updater for ", r.serviceHost)
 	go r.periodicUpdaterTask()
 }
 
@@ -126,27 +127,41 @@ func (r *Resolver) periodicUpdaterTask() {
 // The task is initialized only once for all VUs.
 // The IPs are stored in resolverIps singleton.
 func startPeriodicResolver(serviceHost string) {
-	periodicResolverStartedLock.Lock()
-	defer periodicResolverStartedLock.Unlock()
+	periodicResolverStartLock.Lock()
+	defer periodicResolverStartLock.Unlock()
 
-	if periodicResolverStarted {
+	if _, resolverStarted := getResolverIPs(serviceHost); resolverStarted {
 		return
 	}
 
+	logIfDebug("Starting periodic resolver for ", serviceHost)
+	setResolverIPs(serviceHost, make([]net.IP, 0))
 	go func() {
+		periodicResolverTask(serviceHost)
 		for range time.NewTicker(settings.UpdateEvery).C {
 			periodicResolverTask(serviceHost)
 		}
 	}()
-	periodicResolverStarted = true
 }
 
 func periodicResolverTask(serviceHost string) {
-	var err error
-	resolverIps, err = net.LookupIP(serviceHost)
+	ips, err := net.LookupIP(serviceHost)
 	if err != nil {
 		logger.Error(fmt.Sprintf("Error looking up IPs for %s: %s", serviceHost, err.Error()))
 	} else {
-		logIfDebug(fmt.Sprintf("Looking up IPs for %s: %s", serviceHost, resolverIps))
+		logIfDebug(fmt.Sprintf("Looking up IPs for %s: %s", serviceHost, ips))
+		setResolverIPs(serviceHost, ips)
 	}
+}
+
+func getResolverIPs(serviceHost string) ([]net.IP, bool) {
+	ips, ok := hostsIPs[serviceHost]
+	return ips, ok
+}
+
+func setResolverIPs(serviceHost string, ips []net.IP) {
+	hostsIPsLock.Lock()
+	defer hostsIPsLock.Unlock()
+
+	hostsIPs[serviceHost] = ips
 }

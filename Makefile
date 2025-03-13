@@ -40,7 +40,8 @@ verify: format lint test
 .PHONY: test
 test:
 	@echo "Running unit tests..."
-	@go clean -testcache && go test ./...
+	@go clean -testcache && go test -coverprofile=coverage.out ./...
+	@go tool cover -html=coverage.out -o coverage.html
 
 .PHONY: tidy
 tidy:

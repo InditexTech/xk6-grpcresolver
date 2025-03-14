@@ -37,7 +37,7 @@ There are some attributes that can be configured with the following environment 
 
 ### Technical details
 
-The k6 gRPC client connects (one client is connected per VU), the `Builder` is executed. The `xk6-grpcresolver` plugin overrides the default `Builder` with a custom one, which uses a custom `Resolver`.
+Then the k6 gRPC client connects (one client is connected per VU), the `Builder` is executed. The `xk6-grpcresolver` plugin overrides the default `Builder` with a custom one, which uses a custom `Resolver`.
 
 The `Resolver` resolves the client's hostname to a list of IPs, which is retrieved periodically. This is performed from two tasks which run periodically in background:
 
@@ -45,24 +45,26 @@ The `Resolver` resolves the client's hostname to a list of IPs, which is retriev
 - The **Sync Task** synchronizes the IP/s resolved for the hostname by the **Resolver Task**. This task is attached to each `Resolver`, thus each VU and hostname has its own **Sync Task**. The periodicity at which this task runs is determined by the `GRPC_SYNC_EVERY` environment variable.
 
 ```mermaid
-flowchart LR
+flowchart TB
 grpcClient["GRPC Client"]
-hostIPs{{"IPs resolved\nper host"}}
+hostIPs{{"IPs resolved"}}
 resolverTask(("Resolver Task"))
 settingUpdateEvery>"GRCP_UPDATE_EVERY"]
 settingSyncEvery>"GRPC_SYNC_EVERY"]
 
-subgraph "per VU"
-    builder["Builder"]
-    resolver["Resolver"]
-    syncTask(("Sync Task"))
-end
-
-grpcClient --> builder --> resolver
-syncTask -- "update IPs in" --> resolver
-hostIPs --> syncTask
-resolverTask -- "net.LookupIP" --> hostIPs
-
 settingUpdateEvery --> resolverTask
 settingSyncEvery --> syncTask
+
+subgraph "per host"
+    grpcClient --> builder --> resolver
+    syncTask -- "update IPs in" --> resolver
+    hostIPs --> syncTask
+    resolverTask -- "net.LookupIP" --> hostIPs
+
+    subgraph "per VU"
+        builder["Builder"]
+        resolver["Resolver"]
+        syncTask(("Sync Task"))
+    end
+end
 ```

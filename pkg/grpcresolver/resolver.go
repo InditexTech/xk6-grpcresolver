@@ -9,7 +9,8 @@ import (
 )
 
 var (
-	// resolverIps contains an updated list of the IPs resolved for the serviceHost.
+	// hostsIPs contains an updated list of the IPs resolved per host.
+	// The existence of a host in this map means the periodic resolver is running for that host.
 	hostsIPs                  = make(map[string][]net.IP)
 	hostsIPsLock              sync.Mutex
 	periodicResolverStartLock sync.Mutex

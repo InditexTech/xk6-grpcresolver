@@ -57,8 +57,8 @@ services:
       - run
       - /mnt/examples/example.js
       - -v
-      - --duration=5m
-      - --vus=20
+      - --duration=${K6_DURATION:-5m}
+      - --vus=${K6_VUS:-10}
 
 networks:
   default:

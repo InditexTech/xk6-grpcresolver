@@ -31,7 +31,7 @@ build: deps
 .PHONY: run
 run: build
 	@echo "Running example in docker..."
-	@docker compose -f docker/docker-compose.yaml up
+	@docker compose -f docker/docker-compose.yaml up --abort-on-container-exit
 
 .PHONY: verify
 verify: format lint test

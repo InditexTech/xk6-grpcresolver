@@ -29,13 +29,12 @@ build: deps
 	@xk6 build --with github.com/InditexTech/xk6-grpcresolver=.
 
 .PHONY: run
-run: deps
-	@echo "Running example..."
-	@xk6 run ./examples/main.js
+run: build
+	@echo "Running example in docker..."
+	@docker compose -f docker/docker-compose.yaml up
 
 .PHONY: verify
 verify: format lint test
-	@echo "Running verify..."
 
 .PHONY: test
 test:

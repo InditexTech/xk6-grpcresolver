@@ -10,14 +10,6 @@ However, if new replicas are deployed while the test is running, these new repli
 
 ## Install
 
-### Pre-built binaries
-
-```bash
-make run
-```
-
-### Build from source
-
 ```bash
 make build
 ```
@@ -68,3 +60,13 @@ subgraph "per host"
     end
 end
 ```
+
+### Running example
+
+The following example requires `docker` and `docker compose` to be installed in your system:
+
+```bash
+make run
+```
+
+This will deploy two clusters of gRPC servers (each cluster with multiple replicas). Then, it will run the [k6 example](examples/example.js) that will request both replicas, making use of the `xk6-grpcresolver` functionality.

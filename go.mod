@@ -3,7 +3,7 @@ module github.com/InditexTech/xk6-grpcresolver
 go 1.23.3
 
 require (
-	github.com/caarlos0/env/v11 v11.3.1
+	github.com/mstoykov/envconfig v1.5.0
 	github.com/sirupsen/logrus v1.9.3
 	google.golang.org/grpc v1.60.0
 )

@@ -49,6 +49,8 @@ services:
       GRPC_SERVER: "xk6-grpcresolver-example-A"
       GRPC_SERVER_2: "xk6-grpcresolver-example-B"
       GRPC_DEBUG_LOGS: "true"
+      GRPC_UPDATE_EVERY: "2s"
+      GRPC_SYNC_EVERY: "1s"
     volumes: *docker-volumes
     networks:
       - default

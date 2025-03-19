@@ -1,6 +1,6 @@
 module github.com/InditexTech/xk6-grpcresolver
 
-go 1.23.3
+go 1.23.5
 
 require (
 	github.com/mstoykov/envconfig v1.5.0

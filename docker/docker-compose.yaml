@@ -1,0 +1,66 @@
+services:
+
+  # Create 2 clusters of GRPC servers (grpc-server-{A/B}). Each cluster has its own amount of replicas.
+  # The k6 script "example.js" will request each cluster.
+
+  grpc-server-A:
+    image: &docker-image golang:latest
+    deploy:
+      replicas: 3
+    volumes: &docker-volumes
+      - ../:/mnt:ro
+    networks:
+      default:
+        aliases:
+          - xk6-grpcresolver-example-A
+    entrypoint: /bin/bash
+    command: /mnt/examples/run-grpc-server.sh
+    healthcheck: &grpc-server-healthcheck
+      # Wait for the server to be running (it will be listening on port 50051)
+      test: ["CMD", "bash", "-c", "</dev/tcp/localhost/50051"]
+      interval: 1m
+      timeout: 5s  # Timeout for each port check
+      start_period: 5m  # Timeout waiting for the server to start after starting the container
+      start_interval: 5s
+
+  grpc-server-B:
+    image: *docker-image
+    deploy:
+      replicas: 2
+    volumes: *docker-volumes
+    networks:
+      default:
+        aliases:
+          - xk6-grpcresolver-example-B
+    entrypoint: /bin/bash
+    command: /mnt/examples/run-grpc-server.sh
+    healthcheck: *grpc-server-healthcheck
+
+  grpc-client:
+    # The client needs the "k6" binary built in repository root
+    image: *docker-image
+    depends_on:
+      # The client will only start once all the server replicas are ready
+      grpc-server-A:
+        condition: service_healthy
+      grpc-server-B:
+        condition: service_healthy
+    environment:
+      GRPC_SERVER: "xk6-grpcresolver-example-A"
+      GRPC_SERVER_2: "xk6-grpcresolver-example-B"
+      GRPC_DEBUG_LOGS: "true"
+      GRPC_UPDATE_EVERY: "2s"
+      GRPC_SYNC_EVERY: "1s"
+    volumes: *docker-volumes
+    networks:
+      - default
+    entrypoint: /mnt/k6
+    command:
+      - run
+      - /mnt/examples/example.js
+      - -v
+      - --duration=${K6_DURATION:-5m}
+      - --vus=${K6_VUS:-10}
+
+networks:
+  default:

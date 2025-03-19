@@ -1,6 +1,6 @@
 # xk6-grpcresolver
 
-The `xk6-grpcresolver` is a plugin for the k6 load testing tool that resolves a gRPC balanced host to its individual replicas, detecting updates in the available replicas while the test is running.
+A plugin for the k6 load testing tool that resolves a gRPC balanced host to its individual replicas, detecting updates in the available replicas while the test is running.
 
 ## Why?
 

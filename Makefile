@@ -5,7 +5,7 @@ GOLANGCI_VERSION := v1.64.5
 GOLANGCI_BINARY := $(shell command -v golangci-lint 2> /dev/null)
 
 .PHONY: all
-all: format lint test
+all: format lint test build
 
 .PHONY: deps
 deps:

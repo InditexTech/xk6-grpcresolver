@@ -10,8 +10,31 @@ However, if new replicas are deployed while the test is running, these new repli
 
 ## Install
 
+To build a `k6` binary with this extension, first ensure you have the prerequisites:
+
+- [Go toolchain](https://go101.org/article/go-toolchain.html)
+- Git
+
+Then:
+
+1. Download [xk6](https://github.com/grafana/xk6):
 ```bash
-make build
+go install go.k6.io/xk6/cmd/xk6@latest
+```
+
+2. [Build](https://github.com/grafana/xk6#command-usage) the k6 binary:
+```bash
+xk6 build --with github.com/InditexTech/xk6-grpcresolver@latest
+```
+
+### Development
+
+The default target in the Makefile will download the dependencies, format your code, run the tests, and create a `k6` binary with the plugin built from the local code rather than from GitHub.
+
+```bash
+git clone git@github.com:InditexTech/xk6-grpcresolver.git
+cd xk6-grpcresolver
+make
 ```
 
 ## Usage
@@ -26,6 +49,16 @@ There are some attributes that can be configured with the following environment 
 | `GRCP_UPDATE_EVERY`      | Periodicity at which query the list of IPs for the hostnames. Value must comply with [Go time.ParseDuration](https://pkg.go.dev/time#ParseDuration) format.                   | `3s`     |
 | `GRPC_SYNC_EVERY`        | Periodicity at which synchronize the resolved IPs with the gRPC clients per VU. Value must comply with [Go time.ParseDuration](https://pkg.go.dev/time#ParseDuration) format. | `3s`     |
 | `GRPC_DEBUG_LOGS`        | If `true`, show debug logs.                                                                                                                                                   | Disabled |
+
+### Running example
+
+The following example requires `docker` and `docker compose` to be installed in your system:
+
+```bash
+make run
+```
+
+This will deploy two clusters of gRPC servers (each cluster with multiple replicas) from the [Docker Compose file](docker/docker-compose.yaml). Then, it will run the [k6 example](examples/example.js) that will request both replicas, making use of the `xk6-grpcresolver` functionality.
 
 ### Technical details
 
@@ -60,13 +93,3 @@ subgraph "per host"
     end
 end
 ```
-
-### Running example
-
-The following example requires `docker` and `docker compose` to be installed in your system:
-
-```bash
-make run
-```
-
-This will deploy two clusters of gRPC servers (each cluster with multiple replicas). Then, it will run the [k6 example](examples/example.js) that will request both replicas, making use of the `xk6-grpcresolver` functionality.

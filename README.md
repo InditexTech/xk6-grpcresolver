@@ -29,7 +29,7 @@ xk6 build --with github.com/InditexTech/xk6-grpcresolver@latest
 
 ### Development
 
-The default target in the Makefile will download the dependencies, format your code, run the tests, and create a `k6` binary with the plugin built from the local code rather than from GitHub.
+The default target in the [Makefile](Makefile) will download the dependencies, format your code, run the tests, and create a `k6` binary with the plugin built from the local code rather than from GitHub.
 
 ```bash
 git clone git@github.com:InditexTech/xk6-grpcresolver.git
@@ -52,7 +52,7 @@ There are some attributes that can be configured with the following environment 
 
 ### Running example
 
-The following example requires `docker` and `docker compose` to be installed in your system:
+The following example requires [Docker](https://docs.docker.com/engine/install/) & [Docker Compose](https://docs.docker.com/compose/install/) to be installed in your system:
 
 ```bash
 make run

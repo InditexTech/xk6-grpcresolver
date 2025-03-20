@@ -1,3 +1,5 @@
+PROJECT_VERSION := 1.0.0
+
 XK6_VERSION := v0.13.4
 XK6_BINARY := $(shell command -v xk6 2> /dev/null)
 
@@ -58,3 +60,7 @@ format:
 lint: deps
 	@echo "Running golangci-lint..."
 	@golangci-lint run
+
+.PHONY: get-version
+get-version:
+	@echo $(PROJECT_VERSION)

@@ -1,0 +1,41 @@
+name: Release
+
+on:
+  workflow_dispatch:
+  pull_request:
+    types:
+      - closed
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    if: ${{ github.event.pull_request.merged && contains(github.event.pull_request.labels.*.name, 'kind/release') }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Retrieve version
+        shell: bash
+        run: |
+          echo "VERSION=$(make get-version)" >> "$GITHUB_ENV"
+
+      - name: Create Git Tag
+        run: |
+          git config user.email "ghbot@github.com"
+          git config user.name "GitHub Bot"
+
+          git tag -a "${{ env.VERSION }}" -m "Version ${{ env.VERSION }}"
+          git push origin "${{ env.VERSION }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create GitHub Release
+        uses: ncipollo/release-action@a2e71bdd4e7dab70ca26a852f29600c98b33153e
+        with:
+          name: v${{ env.VERSION }}
+          tag: ${{ env.VERSION }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          generateReleaseNotes: true

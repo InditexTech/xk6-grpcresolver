@@ -49,7 +49,7 @@ func (suite *PeriodicResolverTestSuite) TestPeriodicResolverTask() {
 	suite.Require().Empty(ips)
 	suite.Require().False(ok)
 
-	periodicResolverTask(hostname)
+	runLookupTaskOnce(hostname)
 
 	ips, ok = getResolverIPs(hostname)
 	suite.Require().True(ok)

@@ -104,13 +104,14 @@ func (r *Resolver) containsNewIp() bool {
 	return newIps
 }
 
-// startPeriodicUpdater starts a task that periodically synchronizes the IPs of the Resolver with those in the resolverIps array.
-func (r *Resolver) startPeriodicUpdater() {
+// startPeriodicSyncTask starts the Sync Task, which periodically synchronizes the IPs of the Resolver with those in hostsIPs (array of IPs for the current host).
+func (r *Resolver) startPeriodicSyncTask() {
 	logIfDebug("Starting periodic updater for ", r.serviceHost)
-	go r.periodicUpdaterTask()
+	go r.runSyncTask()
 }
 
-func (r *Resolver) periodicUpdaterTask() {
+// runSyncTask runs the Sync Task periodically, until terminated by the quit channel.
+func (r *Resolver) runSyncTask() {
 	ticker := time.NewTicker(settings.SyncEvery)
 	for {
 		select {
@@ -124,10 +125,10 @@ func (r *Resolver) periodicUpdaterTask() {
 	}
 }
 
-// startPeriodicResolver starts a task that periodically analyzes the IPs of the serviceHost.
-// The task is initialized only once for all VUs.
-// The IPs are stored in resolverIps singleton.
-func startPeriodicResolver(serviceHost string) {
+// startPeriodicLookupTask starts the Lookup Task, which periodically analyzes the IPs of the serviceHost.
+// The task is a singleton, initialized only once for all clients.
+// The IPs are stored in the hostsIPs singleton.
+func startPeriodicLookupTask(serviceHost string) {
 	periodicResolverStartLock.Lock()
 	defer periodicResolverStartLock.Unlock()
 
@@ -138,14 +139,15 @@ func startPeriodicResolver(serviceHost string) {
 	logIfDebug("Starting periodic resolver for ", serviceHost)
 	setResolverIPs(serviceHost, make([]net.IP, 0))
 	go func() {
-		periodicResolverTask(serviceHost)
+		runLookupTaskOnce(serviceHost)
 		for range time.NewTicker(settings.UpdateEvery).C {
-			periodicResolverTask(serviceHost)
+			runLookupTaskOnce(serviceHost)
 		}
 	}()
 }
 
-func periodicResolverTask(serviceHost string) {
+// runLookupTaskOnce is the logic of the Lookup Task.
+func runLookupTaskOnce(serviceHost string) {
 	ips, err := net.LookupIP(serviceHost)
 	if err != nil {
 		Logger.Error(fmt.Sprintf("Error looking up IPs for %s: %s", serviceHost, err.Error()))

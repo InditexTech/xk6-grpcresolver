@@ -62,31 +62,31 @@ This will deploy two clusters of gRPC servers (each cluster with multiple replic
 
 ### Technical details
 
-Then the k6 gRPC client connects (one client is connected per VU), the `Builder` is executed. The `xk6-grpcresolver` extension overrides the default `Builder` with a custom one, which uses a custom `Resolver`.
+Then a k6 gRPC client connects, the `Builder` is executed. The `xk6-grpcresolver` extension overrides the default `Builder` with a custom one, which uses a custom `Resolver`.
 
-The `Resolver` resolves the client's hostname to a list of IPs, which is retrieved periodically. This is performed from two tasks which run periodically in background:
+The `Resolver` resolves the client's hostname to a list of IPs, which is retrieved periodically. This is performed by two tasks in the extension, which run periodically in background:
 
-- The **Resolver Task** resolves the hostname to the IP/s. This task is unique for each hostname, and shared between all the VUs. The periodicity at which this task runs is determined by the `GRCP_UPDATE_EVERY` environment variable.
-- The **Sync Task** synchronizes the IP/s resolved for the hostname by the **Resolver Task**. This task is attached to each `Resolver`, thus each VU and hostname has its own **Sync Task**. The periodicity at which this task runs is determined by the `GRPC_SYNC_EVERY` environment variable.
+- The **Lookup Task** resolves the hostname to the IP/s using the [net.LookupIP](https://pkg.go.dev/net#LookupIP) from Go. This task is unique for each hostname, and shared between all the clients. The periodicity at which this task runs is determined by the `GRCP_UPDATE_EVERY` environment variable.
+- The **Sync Task** synchronizes the IP/s resolved for the hostname by the **Lookup Task**. This task is attached to each `Resolver`, thus each client and hostname has its own **Sync Task**. The periodicity at which this task runs is determined by the `GRPC_SYNC_EVERY` environment variable.
 
 ```mermaid
 flowchart TB
 grpcClient["GRPC Client"]
 hostIPs{{"IPs resolved"}}
-resolverTask(("Resolver Task"))
+lookupTask(("Lookup Task"))
 settingUpdateEvery>"GRCP_UPDATE_EVERY"]
 settingSyncEvery>"GRPC_SYNC_EVERY"]
 
-settingUpdateEvery --> resolverTask
+settingUpdateEvery --> lookupTask
 settingSyncEvery --> syncTask
 
 subgraph "per host"
     grpcClient --> builder --> resolver
     syncTask -- "update IPs in" --> resolver
     hostIPs --> syncTask
-    resolverTask -- "net.LookupIP" --> hostIPs
+    lookupTask -- "net.LookupIP" --> hostIPs
 
-    subgraph "per VU"
+    subgraph "per GRPC Client"
         builder["Builder"]
         resolver["Resolver"]
         syncTask(("Sync Task"))

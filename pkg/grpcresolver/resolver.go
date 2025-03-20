@@ -30,7 +30,7 @@ type Resolver struct {
 // ResolveNow runs an internal resolve, updating with the current list of endpoints.
 func (r *Resolver) ResolveNow(_ resolver.ResolveNowOptions) {
 	if err := r.update(); err != nil {
-		logger.Error("error resolving: ", err)
+		Logger.Error("error resolving: ", err)
 	}
 }
 
@@ -73,7 +73,7 @@ func (r *Resolver) update() error {
 	// grpc/service_config.go currently supports a 'loadBalancingConfig' field, however it looks likely to change, so for
 	// now stick to the existing JSON definition.
 	if len(r.currentIps) > 0 {
-		logger.Info("Service host k8s:///", r.serviceHost, " has been resolved successfully with IPs ", addrs)
+		Logger.Info("Service host k8s:///", r.serviceHost, " has been resolved successfully with IPs ", addrs)
 	}
 	r.currentIps = resolverIps
 	_ = r.conn.UpdateState(resolver.State{
@@ -116,7 +116,7 @@ func (r *Resolver) periodicUpdaterTask() {
 		select {
 		case <-ticker.C:
 			if err := r.update(); err != nil {
-				logger.Error("periodic updater failed resolving: ", err)
+				Logger.Error("periodic updater failed resolving: ", err)
 			}
 		case <-r.quitC:
 			return
@@ -148,7 +148,7 @@ func startPeriodicResolver(serviceHost string) {
 func periodicResolverTask(serviceHost string) {
 	ips, err := net.LookupIP(serviceHost)
 	if err != nil {
-		logger.Error(fmt.Sprintf("Error looking up IPs for %s: %s", serviceHost, err.Error()))
+		Logger.Error(fmt.Sprintf("Error looking up IPs for %s: %s", serviceHost, err.Error()))
 	} else {
 		logIfDebug(fmt.Sprintf("Looking up IPs for %s: %s", serviceHost, ips))
 		setResolverIPs(serviceHost, ips)

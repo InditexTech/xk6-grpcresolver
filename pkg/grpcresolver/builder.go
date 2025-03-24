@@ -43,8 +43,8 @@ func (b *Builder) Build(target resolver.Target, conn resolver.ClientConn, _ reso
 		return nil, err
 	}
 
-	startPeriodicResolver(endpointHost)
-	customResolver.startPeriodicUpdater()
+	startPeriodicLookupTask(endpointHost)
+	customResolver.startPeriodicSyncTask()
 
 	return customResolver, nil
 }

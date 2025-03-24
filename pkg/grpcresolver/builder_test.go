@@ -57,7 +57,7 @@ func (suite *BuilderTestSuite) TestBuilderComplete() {
 
 	// Should have updated the ClientConn with the resolved IPs
 	connUpdates := conn.stateUpdates.values
-	suite.Assert().GreaterOrEqual(1, len(connUpdates))
+	suite.Assert().GreaterOrEqual(len(connUpdates), 1)
 	for _, connUpdate := range connUpdates {
 		for _, address := range connUpdate.Addresses {
 			suite.Assert().Equal(host, address.ServerName, fmt.Sprintf("asserting address.Servername %v", address))

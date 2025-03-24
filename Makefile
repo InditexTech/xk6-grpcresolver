@@ -74,7 +74,7 @@ reuse-deps:
 .PHONY: add-copyright-headers
 reuse-annotate: reuse-deps
 	@echo "Adding copyright headers..."
-	@reuse annotate --copyright "Industria Textil de Diseño, S.A." --license "Apache-2.0" *.go **/**/*.go
+	@reuse annotate --copyright "Industria de Diseño Textil S.A. INDITEX" --license "Apache-2.0" --year "$$(date +%Y)" --merge-copyrights *.go **/**/*.go
 	@reuse lint
 
 .PHONY: get-version

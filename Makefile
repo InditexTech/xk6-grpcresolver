@@ -65,7 +65,7 @@ lint: deps
 add-copyright-headers:
 	@bash -c ' \
 		SPDX1="// SPDX-FileCopyrightText: © 2025 Industria de Diseño Textil S.A. INDITEX"; \
-		SPDX2="// SPDX-License-Identifier: APACHE-2.0"; \
+		SPDX2="// SPDX-License-Identifier: Apache-2.0"; \
 		find . -type f -name "*.go" | while read file; do \
 			line1=$$(sed -n "1p" $$file); \
 			line2=$$(sed -n "2p" $$file); \

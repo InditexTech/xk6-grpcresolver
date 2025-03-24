@@ -25,7 +25,7 @@ jobs:
       - name: Setup Go version
         uses: actions/setup-go@v5
         with:
-          go-version: ${{ env.GO_VERSION }}          
+          go-version: ${{ env.GO_VERSION }}
 
       - name: Verify
         run: |
@@ -67,4 +67,4 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
 
       - name: REUSE Compliance Check
-        uses: fsfe/reuse-action@v3
+        uses: fsfe/reuse-action@v5

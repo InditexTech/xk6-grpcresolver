@@ -1,5 +1,7 @@
-// SPDX-FileCopyrightText: © 2025 Industria de Diseño Textil S.A. INDITEX
+// SPDX-FileCopyrightText: 2025 Industria Textil de Diseño, S.A.
+//
 // SPDX-License-Identifier: Apache-2.0
+
 package grpcresolver
 
 import (

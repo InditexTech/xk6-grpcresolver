@@ -61,22 +61,21 @@ lint: deps
 	@echo "Running golangci-lint..."
 	@golangci-lint run
 
-.PHONY: add-copyright-headers
-add-copyright-headers:
-	@bash -c ' \
-		SPDX1="// SPDX-FileCopyrightText: © 2025 Industria de Diseño Textil S.A. INDITEX"; \
-		SPDX2="// SPDX-License-Identifier: Apache-2.0"; \
-		find . -type f -name "*.go" | while read file; do \
-			line1=$$(sed -n "1p" $$file); \
-			line2=$$(sed -n "2p" $$file); \
-			if [[ "$$line1" =~ ^//\ SPDX-FileCopyrightText: && "$$line2" =~ ^//\ SPDX-License-Identifier: ]]; then \
-				sed -i "1s|.*|$$SPDX1|" $$file; \
-				sed -i "2s|.*|$$SPDX2|" $$file; \
-			else \
-				{ echo "$$SPDX1"; echo "$$SPDX2"; cat $$file; } > $$file.tmp && mv $$file.tmp $$file; \
-			fi \
-		done'
+.PHONY: reuse-deps
+reuse-deps:
+	@if [ -z "reuse" ]; then \
+		echo "Installing reuse tool..."; \
+		pip3 install --user reuse ;\
+	else \
+		echo "reuse is already installed."; \
+	fi
 
+
+.PHONY: add-copyright-headers
+reuse-annotate: reuse-deps
+	@echo "Adding copyright headers..."
+	@reuse annotate --copyright "Industria Textil de Diseño, S.A." --license "Apache-2.0" *.go **/**/*.go
+	@reuse lint
 
 .PHONY: get-version
 get-version:

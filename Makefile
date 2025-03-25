@@ -1,10 +1,12 @@
 PROJECT_VERSION := 1.0.0
 
+GOPATH := $(shell command go env GOPATH)
+
 XK6_VERSION := v0.13.4
-XK6_BINARY := $(shell command -v xk6 2> /dev/null)
+XK6_BINARY := "$(GOPATH)/bin/xk6"
 
 GOLANGCI_VERSION := v1.64.5
-GOLANGCI_BINARY := $(shell command -v golangci-lint 2> /dev/null)
+GOLANGCI_BINARY := "$(GOPATH)/bin/golangci-lint"
 
 .DEFAULT_GOAL := all
 
@@ -13,24 +15,24 @@ all: format lint test build
 
 .PHONY: deps
 deps:
-	@if [ -z "$(XK6_BINARY)" ]; then \
+	@if [ ! -f "$(XK6_BINARY)" ]; then \
 		echo "Installing xk6..."; \
 		go install go.k6.io/xk6/cmd/xk6@$(XK6_VERSION); \
 	else \
-		echo "xk6 is already installed."; \
+		echo "xk6 is already installed @ $(XK6_BINARY)"; \
 	fi
 
-	@if [ -z "$(GOLANGCI_BINARY)" ]; then \
+	@if [ ! -f "$(GOLANGCI_BINARY)" ]; then \
 			echo "Installing golangci-lint..."; \
 			go install github.com/golangci/golangci-lint/cmd/golangci-lint@$(GOLANGCI_VERSION); \
 	else \
-		echo "golangci-lint is already installed."; \
+		echo "golangci-lint is already installed @ $(GOLANGCI_BINARY)"; \
 	fi
 
 .PHONY: build
 build: deps
 	@echo "Building k6 with grpcresolver extension..."
-	@xk6 build --with github.com/InditexTech/xk6-grpcresolver=.
+	@"$(XK6_BINARY)" build --with github.com/InditexTech/xk6-grpcresolver=.
 
 .PHONY: run
 run: build
@@ -59,7 +61,7 @@ format:
 .PHONY: lint
 lint: deps
 	@echo "Running golangci-lint..."
-	@golangci-lint run
+	@"$(GOLANGCI_BINARY)" run
 
 .PHONY: reuse-deps
 reuse-deps:
@@ -69,7 +71,6 @@ reuse-deps:
 	else \
 		echo "reuse is already installed."; \
 	fi
-
 
 .PHONY: add-copyright-headers
 reuse-annotate: reuse-deps

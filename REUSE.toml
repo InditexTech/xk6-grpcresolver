@@ -1,0 +1,20 @@
+version = 1
+SPDX-PackageName = "xk6-grpcresolver"
+SPDX-PackageSupplier = "Industria de Diseño Textil S.A. INDITEX"
+SPDX-PackageDownloadLocation = "https://github.com/InditexTech/xk6-grpcresolver"
+
+[[annotations]]
+path = [ # Ignored files
+    ".gitignore",
+    ".github/**",
+    "*.md",
+    "go.mod",
+    "go.sum",
+    "docker/**",
+    "examples/**",
+    "repolinter.json",
+    "REUSE.toml",
+    "Makefile"
+]
+SPDX-FileCopyrightText = "2025 Industria Textil de Diseño S.A. INDITEX"
+SPDX-License-Identifier = "Apache-2.0"

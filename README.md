@@ -100,4 +100,5 @@ Contributions are welcome! Please see the [CONTRIBUTING.md](CONTRIBUTING.md) fil
 
 ## License
 
+© 2025 INDUSTRIA DE DISEÑO TEXTIL S.A. (INDITEX S.A.)
 This project is licensed under the terms of the [AGPL-3.0-only](LICENSE) license.

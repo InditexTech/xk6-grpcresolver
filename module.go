@@ -1,6 +1,6 @@
-// SPDX-FileCopyrightText: 2025 Industria de Diseño Textil S.A. INDITEX
+// SPDX-FileCopyrightText: 2025 INDUSTRIA DE DISEÑO TEXTIL S.A. (INDITEX S.A.)
 //
-// SPDX-License-Identifier: Apache-2.0
+// SPDX-License-Identifier: AGPL-3.0-only
 
 package resolver
 

@@ -5,7 +5,10 @@
 package grpcresolver
 
 import (
+	"fmt"
+	"math/rand/v2"
 	"net"
+	"sync"
 	"testing"
 
 	"github.com/stretchr/testify/suite"
@@ -59,4 +62,45 @@ func (suite *PeriodicResolverTestSuite) TestPeriodicResolverTask() {
 	ips, ok = getResolverIPs(hostname)
 	suite.Require().True(ok)
 	suite.Require().GreaterOrEqual(len(ips), 1)
+}
+
+func (suite *PeriodicResolverTestSuite) TestGetSetConcurrently() {
+	writeTimes := 1000000
+	getTimes := 1000000
+	randHostnamesCount := 20
+
+	getRandHostname := func() string {
+		n := rand.IntN(randHostnamesCount)
+		return fmt.Sprintf("%d.test.local", n)
+	}
+
+	getRandIPs := func() []net.IP {
+		ips := make([]net.IP, 5)
+		for i := 0; i < 5; i++ {
+			ip := net.IPv4(byte(rand.IntN(256)), byte(rand.IntN(256)), byte(rand.IntN(256)), byte(rand.IntN(256)))
+			ips = append(ips, ip)
+		}
+		return ips
+	}
+
+	wait := sync.WaitGroup{}
+	wait.Add(2)
+
+	// Write
+	go func() {
+		for i := 0; i < writeTimes; i++ {
+			setResolverIPs(getRandHostname(), getRandIPs())
+		}
+		wait.Done()
+	}()
+
+	// Read
+	go func() {
+		for i := 0; i < getTimes; i++ {
+			getResolverIPs(getRandHostname())
+		}
+		wait.Done()
+	}()
+
+	wait.Wait()
 }

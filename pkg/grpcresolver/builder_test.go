@@ -6,7 +6,6 @@ package grpcresolver
 
 import (
 	"fmt"
-	"net"
 	neturl "net/url"
 	"testing"
 	"time"
@@ -24,7 +23,7 @@ func TestBuilderTestSuite(t *testing.T) {
 }
 
 func (suite *BuilderTestSuite) AfterTest(_, _ string) {
-	hostsIPs = make(map[string][]net.IP)
+	hostsIPs.Clear()
 }
 
 func (suite *BuilderTestSuite) TestBuilderComplete() {

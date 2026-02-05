@@ -23,7 +23,7 @@ func TestPeriodicResolverTestSuite(t *testing.T) {
 }
 
 func (suite *PeriodicResolverTestSuite) AfterTest(_, _ string) {
-	hostsIPs = make(map[string][]net.IP)
+	hostsIPs.Clear()
 }
 
 func (suite *PeriodicResolverTestSuite) TestGetSetResolverIPs() {
@@ -64,6 +64,8 @@ func (suite *PeriodicResolverTestSuite) TestPeriodicResolverTask() {
 	suite.Require().GreaterOrEqual(len(ips), 1)
 }
 
+// Read and Write the hostsIPs map several times, concurrently from two goroutines.
+// Should not panic because of the concurrent access to the map.
 func (suite *PeriodicResolverTestSuite) TestGetSetConcurrently() {
 	writeTimes := 1000000
 	getTimes := 1000000

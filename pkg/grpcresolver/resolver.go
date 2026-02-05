@@ -6,17 +6,17 @@ package grpcresolver
 
 import (
 	"fmt"
-	"google.golang.org/grpc/resolver"
 	"net"
 	"sync"
 	"time"
+
+	"google.golang.org/grpc/resolver"
 )
 
 var (
 	// hostsIPs contains an updated list of the IPs resolved per host.
 	// The existence of a host in this map means the periodic resolver is running for that host.
-	hostsIPs                  = make(map[string][]net.IP)
-	hostsIPsLock              sync.Mutex
+	hostsIPs                  sync.Map
 	periodicResolverStartLock sync.Mutex
 )
 
@@ -162,13 +162,15 @@ func runLookupTaskOnce(serviceHost string) {
 }
 
 func getResolverIPs(serviceHost string) ([]net.IP, bool) {
-	ips, ok := hostsIPs[serviceHost]
-	return ips, ok
+	if result, ok := hostsIPs.Load(serviceHost); ok {
+		if ips, parseOk := result.([]net.IP); parseOk {
+			return ips, true
+		}
+	}
+
+	return nil, false
 }
 
 func setResolverIPs(serviceHost string, ips []net.IP) {
-	hostsIPsLock.Lock()
-	defer hostsIPsLock.Unlock()
-
-	hostsIPs[serviceHost] = ips
+	hostsIPs.Store(serviceHost, ips)
 }

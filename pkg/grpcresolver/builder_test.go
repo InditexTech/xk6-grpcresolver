@@ -6,12 +6,12 @@ package grpcresolver
 
 import (
 	"fmt"
-	"github.com/stretchr/testify/suite"
-	"google.golang.org/grpc/resolver"
-	"net"
 	neturl "net/url"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/suite"
+	"google.golang.org/grpc/resolver"
 )
 
 type BuilderTestSuite struct {
@@ -23,7 +23,7 @@ func TestBuilderTestSuite(t *testing.T) {
 }
 
 func (suite *BuilderTestSuite) AfterTest(_, _ string) {
-	hostsIPs = make(map[string][]net.IP)
+	hostsIPs.Clear()
 }
 
 func (suite *BuilderTestSuite) TestBuilderComplete() {

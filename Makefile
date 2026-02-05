@@ -1,4 +1,4 @@
-PROJECT_VERSION := 1.0.0
+PROJECT_VERSION := 1.0.1
 
 GOPATH := $(shell command go env GOPATH)
 

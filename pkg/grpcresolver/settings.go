@@ -5,8 +5,9 @@
 package grpcresolver
 
 import (
-	"github.com/mstoykov/envconfig"
 	"time"
+
+	"github.com/mstoykov/envconfig"
 )
 
 var settings = &SettingsSpec{}

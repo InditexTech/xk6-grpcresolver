@@ -6,9 +6,10 @@ package grpcresolver
 
 import (
 	"fmt"
-	"google.golang.org/grpc/resolver"
 	"strconv"
 	"strings"
+
+	"google.golang.org/grpc/resolver"
 )
 
 // Builder implements the gRPC resolver.go Builder interface, so can replace the default implementation in the k6 gRPC client.

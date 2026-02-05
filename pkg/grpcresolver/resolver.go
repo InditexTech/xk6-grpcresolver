@@ -6,10 +6,11 @@ package grpcresolver
 
 import (
 	"fmt"
-	"google.golang.org/grpc/resolver"
 	"net"
 	"sync"
 	"time"
+
+	"google.golang.org/grpc/resolver"
 )
 
 var (

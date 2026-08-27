@@ -5,13 +5,15 @@ on:
   pull_request:
 
 env:
-  GO_VERSION: 1.23.5
+  GO_VERSION: 1.25.14
   NODE_VERSION: 18.x
 
 jobs:
   verify:
     name: Verify
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: KengoTODA/actions-setup-docker-compose@v1
         with:
@@ -34,6 +36,8 @@ jobs:
   repo-linter:
     name: Repo Linter
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -59,6 +63,8 @@ jobs:
   reuse-compliance:
     name: REUSE Compliance
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout
         uses: actions/checkout@v4

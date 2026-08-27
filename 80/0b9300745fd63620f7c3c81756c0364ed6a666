@@ -1,0 +1,19 @@
+go.sum
+  s_8615f506660c3c::t_45e799eb355054 1-2,5-22
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "800b9300745fd63620f7c3c81756c0364ed6a666",
+  "prompts": {},
+  "sessions": {
+    "s_8615f506660c3c": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_fbd0e3967ffexFL1ihe8LAZkZ9",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Mariano Alonso Ortiz <marianoao@inditex.com>"
+    }
+  }
+}

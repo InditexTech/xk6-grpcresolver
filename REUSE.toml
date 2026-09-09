@@ -6,6 +6,7 @@ SPDX-PackageDownloadLocation = "https://github.com/InditexTech/xk6-grpcresolver"
 [[annotations]]
 path = [
     ".gitignore",
+    ".sync-exclude",
     ".github/**",
     "*.md",
     "repolinter.json",

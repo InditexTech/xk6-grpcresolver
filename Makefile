@@ -1,12 +1,20 @@
 PROJECT_VERSION := 1.0.1
 
 GOPATH := $(shell command go env GOPATH)
+# `go install` writes to GOBIN when it is set, and only falls back to
+# $(GOPATH)/bin otherwise. Resolve the same directory the toolchain uses so
+# tool lookups keep working under an asdf-managed Go, where GOPATH is
+# relocated but GOBIN may still be inherited from the environment.
+GOBIN := $(shell command go env GOBIN)
+ifeq ($(strip $(GOBIN)),)
+GOBIN := $(GOPATH)/bin
+endif
 
 XK6_VERSION := v0.13.4
-XK6_BINARY := "$(GOPATH)/bin/xk6"
+XK6_BINARY := "$(GOBIN)/xk6"
 
 GOLANGCI_VERSION := v1.64.5
-GOLANGCI_BINARY := "$(GOPATH)/bin/golangci-lint"
+GOLANGCI_BINARY := "$(GOBIN)/golangci-lint"
 
 .DEFAULT_GOAL := all
 

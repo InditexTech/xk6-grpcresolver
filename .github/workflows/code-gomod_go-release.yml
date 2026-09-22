@@ -33,6 +33,9 @@ concurrency:
 jobs:
   release-core:
     name: Prepare and Build Release
+    if: >-
+      github.event_name != 'pull_request' ||
+      github.event.pull_request.head.repo.full_name == github.repository
     uses: ./.github/workflows/code-gomod_go-release-core.yml
     with:
       release_type: ${{ inputs.release_type }}
@@ -42,6 +45,11 @@ jobs:
   github-release:
     name: Create GitHub Release ${{ matrix.release.tag }}
     needs: release-core
+    if: >-
+      always() &&
+      needs.release-core.result == 'success' &&
+      (github.event_name != 'pull_request' ||
+      github.event.pull_request.head.repo.full_name == github.repository)
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     permissions:

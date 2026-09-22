@@ -115,14 +115,25 @@ jobs:
             printf '%s.%s.%s' "$major" "$minor" "$patch"
           }
 
+          semver_gt() {
+            local lmajor lminor lpatch rmajor rminor rpatch
+            IFS=. read -r lmajor lminor lpatch <<< "$1"
+            IFS=. read -r rmajor rminor rpatch <<< "$2"
+            (( lmajor != rmajor )) && return $(( lmajor > rmajor ? 0 : 1 ))
+            (( lminor != rminor )) && return $(( lminor > rminor ? 0 : 1 ))
+            (( lpatch > rpatch ))
+          }
+
           current_version="0.0.0"
           has_release="false"
-          while IFS= read -r tag; do
-            [[ "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || continue
-            current_version="${tag#v}"
+          while IFS= read -r candidate; do
+            stripped="${candidate#v}"
+            [[ "$stripped" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || continue
+            if [[ "$has_release" == "false" ]] || semver_gt "$stripped" "$current_version"; then
+              current_version="$stripped"
+            fi
             has_release="true"
-            break
-          done < <(git tag --list 'v*' --sort=-v:refname)
+          done < <(git tag --list 'v[0-9]*' '[0-9]*')
 
           release_version="$(bump_semver "$current_version" "$release_bump")"
           release_tag="v${release_version}"

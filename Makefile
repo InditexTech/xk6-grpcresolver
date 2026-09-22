@@ -1,12 +1,16 @@
 PROJECT_VERSION := 1.0.1
 
 GOPATH := $(shell command go env GOPATH)
+GOBIN := $(shell command go env GOBIN)
+ifeq ($(strip $(GOBIN)),)
+GOBIN := $(GOPATH)/bin
+endif
 
 XK6_VERSION := v0.13.4
-XK6_BINARY := "$(GOPATH)/bin/xk6"
+XK6_BINARY := "$(GOBIN)/xk6"
 
 GOLANGCI_VERSION := v1.64.5
-GOLANGCI_BINARY := "$(GOPATH)/bin/golangci-lint"
+GOLANGCI_BINARY := "$(GOBIN)/golangci-lint"
 
 .DEFAULT_GOAL := all
 

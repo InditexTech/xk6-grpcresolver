@@ -5,7 +5,7 @@ go 1.25.14
 require (
 	github.com/mstoykov/envconfig v1.5.0
 	github.com/sirupsen/logrus v1.10.2
-	google.golang.org/grpc v1.83.2
+	google.golang.org/grpc v1.84.0
 )
 
 require (

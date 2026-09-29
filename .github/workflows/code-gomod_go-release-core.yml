@@ -31,10 +31,6 @@ on:
       APP_PRIVATE_KEY:
         required: true
 
-permissions:
-  actions: read
-  contents: read
-
 env:
   CI_GOVERNANCE_RELEASE_STAGING_REF: refs/ci-governance/release/${{ github.run_id }}-${{ github.run_attempt }}
   WORKING_DIRECTORY: ${{ vars.WORKING_DIRECTORY }}
@@ -44,6 +40,8 @@ env:
 jobs:
   prepare-release:
     name: Prepare Release
+    permissions:
+      contents: read
     if: >-
       (
         github.event_name == 'workflow_dispatch' &&
@@ -446,6 +444,8 @@ jobs:
     if: needs.prepare-release.outputs.artifacts == 'binaries'
     runs-on: ubuntu-24.04
     timeout-minutes: 30
+    permissions:
+      actions: read
     strategy:
       fail-fast: false
       matrix:

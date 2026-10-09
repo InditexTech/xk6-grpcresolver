@@ -377,7 +377,7 @@ jobs:
           fi
 
       - name: Configure release git signing
-        uses: InditexTech/gh-actions/configure-release-git@ca5ff3f7d69ee5a3cb026ac5585d680f083d8f7b
+        uses: InditexTech/gh-actions/configure-release-git@3dac9bbff47d1e983604671191a08e4d345d9064
         with:
           token: ${{ steps.app-token.outputs.token }}
           gpg-secret-key: ${{ secrets.CI_GPG_SECRET_KEY }}
@@ -635,7 +635,7 @@ jobs:
           token: ${{ steps.app-token.outputs.token }}
 
       - name: Configure release git signing
-        uses: InditexTech/gh-actions/configure-release-git@ca5ff3f7d69ee5a3cb026ac5585d680f083d8f7b
+        uses: InditexTech/gh-actions/configure-release-git@3dac9bbff47d1e983604671191a08e4d345d9064
         with:
           token: ${{ steps.app-token.outputs.token }}
           gpg-secret-key: ${{ secrets.CI_GPG_SECRET_KEY }}

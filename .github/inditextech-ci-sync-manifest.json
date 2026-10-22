@@ -14,7 +14,7 @@
   "creation_year": 2026,
   "integrity": {
     "algorithm": "hmac-sha256",
-    "signature": "af553c0101196bc4e21026a85bb4766a58d63ad2d42b55500e2b823e940a1464"
+    "signature": "bf3184357e73626be656d57eac13ced03f00021154307f410714364fdcfb33f3"
   },
   "managed_by": "InditexTech CI governance",
   "managed_paths": {
@@ -25,10 +25,10 @@
     ".github/PULL_REQUEST_TEMPLATE.md": "23a0b0ac79a9020ccac9c013582a01f86e2df2ae7f914673583b9a3368313041",
     ".github/inditextech-ci-go.json": "b0e32b653ec535b83e803ec54b688df558593b2ad234cb3cfaf9b42f209a7933",
     ".github/workflows/code-gomod_go-PR_verify.yml": "d148e5af0bc577e6deff1c6c57916de83af3e553fbe197d057ac2e7c6d7e22cb",
-    ".github/workflows/code-gomod_go-release-core.yml": "6a9869dcfb572b782f92873a8649f712c304a7fd409d2353b72d759f100ad42b",
+    ".github/workflows/code-gomod_go-release-core.yml": "084bf87353383286594dc9897f328378439e2c3f183f2267e97b508d6864acab",
     ".github/workflows/code-gomod_go-release.yml": "923519a56e3a88bb5403c7ab5075e072f1b69d51d688339ee1a396d9bbff2b47",
     ".github/workflows/code-gomod_go-sonarcloud-analysis.yml": "fcb5c72a4ae59a3b429420b1e15eda5c4c0cb4a0aa89c3f4f99eb2e3198dcaca",
-    ".github/workflows/code-release_preview.yml": "074adc9b096cde6479657f24cf8b9ce3458ba2f7daa6a6e15ff065941f17c886",
+    ".github/workflows/code-release_preview.yml": "c39e805b12fea1a3f532d453d38e0f87bdd9d8c3e486a3fbb55964ab2e1745bf",
     ".github/workflows/codeql.yml": "c939b9dea312d987ecc8df2b32c257fb7512b5ca5576c9a73dd0b21fcc770b33",
     ".github/workflows/pr-verify.yml": "5628d1d93c09cb761602fcfc3857c325e2dc542cadc159a1edad58d1818d0de0",
     ".github/workflows/push-verify.yml": "643f6905fa30284af4a2eabac752293b2e785a5e82449bb6d97950624386829c",
@@ -49,6 +49,6 @@
   "schema_version": 2,
   "source_digests": {
     "base": "b5d5302dc47b88e363dd1b3adb1c043f85923a8480b8ce057928657fe049872c",
-    "go": "bb05c885bfeca2a56a1dc81eefb7b0fccfa11cdc4a8650569d0485648af5ebb1"
+    "go": "798fbf14163abd152cf729a2834d8150e9beb54eb72e73a523ecc11ab27cc550"
   }
 }

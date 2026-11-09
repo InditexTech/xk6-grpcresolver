@@ -1,0 +1,25 @@
+.github/workflows/code-gomod_go-sonarcloud-analysis.yml
+  s_994fc85ccfcdf6::t_ecd60ab8ea7d4e 132
+.github/workflows/pr-verify.yml
+  s_994fc85ccfcdf6::t_96ae1e411491fd 31
+.github/workflows/push-verify.yml
+  s_994fc85ccfcdf6::t_3e1de468d0f286 32
+.github/workflows/scorecard-analysis.yml
+  s_994fc85ccfcdf6::t_51db2a7c0be914 69,101
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.6",
+  "base_commit_sha": "6c738e276b865fc163d807af5e2d7005a5f6be50",
+  "prompts": {},
+  "sessions": {
+    "s_994fc85ccfcdf6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c8e10874-e427-4c4b-83d2-ff98c3ace8b0",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Ivan Alvarez Sabin <ivanasabi@inditex.com>"
+    }
+  }
+}

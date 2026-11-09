@@ -1,0 +1,19 @@
+.github/dependabot.yml
+  s_321a66447d8185::t_1e3c86169dac83 14-30
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.6",
+  "base_commit_sha": "038f5a5d3256879e26216dbaeaa8cd0993cc7ba5",
+  "prompts": {},
+  "sessions": {
+    "s_321a66447d8185": {
+      "agent_id": {
+        "tool": "github-copilot-cli",
+        "id": "3072a309-82b1-40ea-8573-367fb4af9c8f",
+        "model": "claude-sonnet-5.5"
+      },
+      "human_author": "Ivan Alvarez Sabin <ivanasabi@inditex.com>"
+    }
+  }
+}

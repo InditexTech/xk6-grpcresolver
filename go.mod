@@ -1,16 +1,16 @@
 module github.com/InditexTech/xk6-grpcresolver
 
-go 1.25.14
+go 1.26.0
 
 require (
 	github.com/mstoykov/envconfig v1.5.0
 	github.com/sirupsen/logrus v1.10.2
-	google.golang.org/grpc v1.84.0
+	google.golang.org/grpc v1.85.0
 )
 
 require (
 	github.com/stretchr/testify v1.12.1
-	golang.org/x/sys v0.47.0 // indirect
+	golang.org/x/sys v0.48.0 // indirect
 )
 
 require (
